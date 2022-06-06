@@ -18,23 +18,28 @@ server.get("/api/users", (req, res) => {
     res.json(result);
   })
 })
+
 // Post new user
 server.post("/api/users", (req, res) => {
   Users.insert(req.body).then(result => {
+    if (result.bio == null || result.name == null) {
+      res.status(400).json({message: "provide name and bio"})
+      return;
+    }
+    console.log(result);
     res.status(201).json(result);
   })
-  
 })
 
 //Fetch a user by ID
 server.get("/api/users/:id", (req, res) => {
   Users.findById(req.params.id).then(result => {
     if (result == null) {
-      res.status(404).json({message: "user not found"});
+      res.status(404).json({message: "does not exist"});
       return;
     }
     res.json(result);
-  })
+  });
 })
 
 // Delete a user
@@ -42,7 +47,7 @@ server.delete('/api/users/:id', (req, res) => {
 
   Users.remove(req.params.id).then(result => {
     if (result == null) {
-      res.status(404).json({message: "user not found"});
+      res.status(404).json({message: "does not exist"});
       return;
     }
     res.json(result);
@@ -51,17 +56,20 @@ server.delete('/api/users/:id', (req, res) => {
 
 // Update a user
 server.put('/api/users/:id', (req, res) => {
-  console.log(req.body);
   Users.update(req.params.id, req.body).then(result => {
+    if (result.bio == null || result.name == null) {
+      res.status(400).json({message: "provide name and bio"})
+      return;
+    }
     if (result == null) {
-      res.status(404).json({message: "user not found"});
+      res.status(404).json({message: "does not exist"});
       return;
     }
     res.json(result);
   })
-  .catch(err => {
-    res.status(500).json({message: err.message})
-  })
+  .catch(() => {
+    res.status(404).json({message: "does not exist"});
+  });
 });
 
 
